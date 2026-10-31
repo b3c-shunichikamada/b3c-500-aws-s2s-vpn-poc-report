@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>05 PoC 試験結果（T01〜T10）— 内部用</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav><a href="index.html">目次</a></nav>
+<h1>05 PoC 試験結果（T01〜T10）— 内部用</h1>
+<p>証跡の置き場: <a href="evidence/"><code>evidence\</code></a>（試験ごとに 1 ファイル。生の出力をそのまま貼ってあり、各ファイルの冒頭に取得日時・コマンド・実行した場所・伏せ字の範囲を書いてある）
+伏せ字: PSK・管理者 IP・口座番号の値だけを置き換えた。ほかの IP は実値。ほかは未加工。</p>
+<h2>0. 結論</h2>
+<ul>
+<li>実接続の試験 T01〜T04・T07 は合格。T02・T05・T06 は合格だが、仕様の「Cisco」は実際には <strong>Yamaha vRX</strong> で確認した。</li>
+<li>ping は両方向 5/5（損失 0%）。VPN が UP なだけでなく、経路が vRX を通ることを <code>traceroute -I</code> で確認した。</li>
+<li>T08〜T10 は資料・手順書の項目。T08 はサンプル取得まで実施、T09 は CLI 手順を実行した記録の範囲、T10 は <strong>未実施</strong>（Web GUI での操作確認はしていない）。</li>
+</ul>
+<h2>1. 試験の表</h2>
+<table>
+<thead>
+<tr>
+<th>試験</th>
+<th>内容</th>
+<th>結果</th>
+<th>実施時刻（2026-11-01）</th>
+<th>コマンド・確認方法</th>
+<th>証跡の場所</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>T02</td>
+<td>IPsec 確立（Tunnel1 UP）</td>
+<td>合格</td>
+<td>02:14:38</td>
+<td><code>describe-&lt;VPN_ID&gt;</code> の VgwTelemetry。Tunnel1=UP、Tunnel2=DOWN（使わない設計）</td>
+<td><a href="evidence/T02_tunnel_status.txt"><code>evidence\T02_tunnel_status.txt</code></a></td>
+</tr>
+<tr>
+<td>T03</td>
+<td>EC2-A → EC2-B ping</td>
+<td>合格</td>
+<td>02:14:28</td>
+<td>EC2-A で <code>ping -c 5 10.20.1.10</code>。5/5、損失 0%</td>
+<td><a href="evidence/T03_ping_A_to_B.txt"><code>evidence\T03_ping_A_to_B.txt</code></a></td>
+</tr>
+<tr>
+<td>T04</td>
+<td>EC2-B → EC2-A ping</td>
+<td>合格</td>
+<td>02:14:33</td>
+<td>EC2-B で <code>ping -c 5 10.10.1.10</code>。5/5、損失 0%</td>
+<td><a href="evidence/T04_ping_B_to_A.txt"><code>evidence\T04_ping_B_to_A.txt</code></a></td>
+</tr>
+<tr>
+<td>T05</td>
+<td>IKE SA 正常確立（仕様は Cisco）</td>
+<td>合格（<strong>実機は Yamaha vRX</strong>）</td>
+<td>02:14:40</td>
+<td>vRX <code>show ipsec sa</code>（IKE SA 1 本）、<code>show status tunnel 1</code>（接続状態・IKE キープアライブ OK）</td>
+<td><a href="evidence/T05_T06_vrx_ipsec.txt"><code>evidence\T05_T06_vrx_ipsec.txt</code></a></td>
+</tr>
+<tr>
+<td>T06</td>
+<td>IPsec SA 正常確立（仕様は Cisco）</td>
+<td>合格（<strong>実機は Yamaha vRX</strong>）</td>
+<td>02:14:40</td>
+<td>vRX <code>show ipsec sa</code>（ESP の send/recv 各 1 本）</td>
+<td><a href="evidence/T05_T06_vrx_ipsec.txt"><code>evidence\T05_T06_vrx_ipsec.txt</code></a></td>
+</tr>
+<tr>
+<td>T07</td>
+<td>VPN 経由を確認</td>
+<td>合格</td>
+<td>02:14:38・02:14:40</td>
+<td>EC2-A <code>sudo traceroute -I -n -m 3 10.20.1.10</code>：1 段目 10.10.1.5（vRX の LAN2）、2 段目 10.20.1.10。vRX <code>show ip route</code>：10.20.0.0/16 が TUNNEL[1] 向き。ping の前後で vRX のトンネルの受信・送信パケットが増加（10→21、T07 に前後の全文）</td>
+<td><a href="evidence/T07_route.txt"><code>evidence\T07_route.txt</code></a></td>
+</tr>
+<tr>
+<td>T10</td>
+<td>Web 手順の操作手順と設定値を確認</td>
+<td><strong>未実施</strong></td>
+<td>-</td>
+<td>02-AWS-WebGUI-Procedure.md は手順書として作成された。AWS の Web コンソールでの実操作は行っていない（画面での確認なし）</td>
+<td>（証跡なし。未実施）</td>
+</tr>
+</tbody>
+</table>
+<p>補足:
+- T05・T06 は仕様の文言が「Cisco」。実機は Cisco ではなく Yamaha vRX で、その旨を表に書いた。仕様の合格条件（IKE SA・IPsec SA が確立）は vRX で満たしている。
+- 時刻は各 evidence ファイルの冒頭に書いた。02:10〜02:11 にも同じ試験を 1 回行い、02:14 の取り直しと合わせて 2 回とも合格（初回の vRX のパケット数の前後は T07 に収録）。T02〜T07 の試験は 02:14 の取り直しと 02:10〜02:11 の初回、計 2 回とも合格。</p>
+<h2>2. 実施した試験と、手順書だけの項目</h2>
+<table>
+<thead>
+<tr>
+<th>区分</th>
+<th>項目</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>実機・実環境で実施した</td>
+<td>T01、T02、T03、T04、T05、T06、T07</td>
+</tr>
+<tr>
+<td>資料の作成が主（実接続の検証なし）</td>
+<td>T08（サンプル取得）、04 の Cisco・Fortinet の設定例（実機検証なし）</td>
+</tr>
+<tr>
+<td>一部のみ</td>
+<td>T09（CLI を実行した記録は有るが、手順書との突き合わせは未確認）</td>
+</tr>
+<tr>
+<td>手順書を作っただけ／未実施</td>
+<td>T10（Web GUI の操作確認）、Yamaha の GUI 手順（未確認）、Cisco C8000V の実機検証、Fortinet の実機検証</td>
+</tr>
+</tbody>
+</table>
+<h2>3. 要点（生の出力の全文は <a href="evidence/"><code>evidence\</code></a> の各ファイルにある）</h2>
+<p>引用は evidence の出力から抜いた行（加工なし）。
+- T03（<a href="evidence/T03_ping_A_to_B.txt"><code>evidence\T03_ping_A_to_B.txt</code></a>）: <code>5 packets transmitted, 5 received, 0% packet loss, time 4008ms</code>
+- T04（<a href="evidence/T04_ping_B_to_A.txt"><code>evidence\T04_ping_B_to_A.txt</code></a>）: <code>5 packets transmitted, 5 received, 0% packet loss, time 4005ms</code>
+- T07（<a href="evidence/T07_route.txt"><code>evidence\T07_route.txt</code></a>）: traceroute の 1 段目 <code>1  10.10.1.5  0.341 ms  0.324 ms  0.321 ms</code>（vRX の LAN2）。vRX のトンネルの受信・送信は ping+traceroute の前後で 10→21 パケット。
+- T02（<a href="evidence/T02_tunnel_status.txt"><code>evidence\T02_tunnel_status.txt</code></a>）: Tunnel1 の <code>"Status": "UP"</code>、Tunnel2 は <code>"Status": "DOWN"</code>（使わない設計）。
+- T05・T06（<a href="evidence/T05_T06_vrx_ipsec.txt"><code>evidence\T05_T06_vrx_ipsec.txt</code></a>）: <code>Total: isakmp:1 send:1 recv:1</code>、<code>トンネルインタフェースは接続されています</code>。</p>
+</body>
+</html>
