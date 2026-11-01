@@ -18,8 +18,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: npm
-          cache-dependency-path: dashboard-app/package-lock.json
       - name: Install and compile
         working-directory: dashboard-app
         run: |
