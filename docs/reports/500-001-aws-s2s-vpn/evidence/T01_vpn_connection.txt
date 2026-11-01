@@ -1,7 +1,7 @@
 試験: T01 VPN接続作成
 取得日時: 2026-11-01 02:21:03 JST
 どこで: 作業 PC（Windows、AWS CLI、プロファイル b3c-500-poc、ap-northeast-1）
-コマンド: aws ec2 describe-<VPN_ID> --<VPN_ID>-ids <VPN_ID> --query "<CustomerGatewayConfiguration を除く項目>" --output json
+コマンド（再現例・実際の入力履歴は未確認）: aws ec2 describe-vpn-connections --vpn-connection-ids <VPN_ID> --output json
 除外: CustomerGatewayConfiguration（PSK を含む XML）は取得していない。
 伏せ字: PSK・管理者 IP・口座番号の値だけを置換（<PSK>・<ADMIN_IP>・<ACCOUNT_ID>）。ほかの IP は実値。ほかは未加工。
 ----------------------------------------------------------------------
