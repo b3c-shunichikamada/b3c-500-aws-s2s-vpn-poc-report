@@ -71,7 +71,7 @@
             {
                 "OutsideIpAddress": "54.150.250.168",
                 "TunnelInsideCidr": "169.254.231.248/30",
-                "PreSharedKey": "KT2HVZOIwEqN00iqkk0DPfHSHl8oudmm",
+                "PreSharedKey": "<REDACTED>",
                 "LogOptions": {
                     "CloudWatchLogOptions": {
                         "LogEnabled": false,
